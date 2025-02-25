@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-3xl">
+    <h2 class="text-3xl font-bold text-center text-blue-600 mb-6">📁 File Manager</h2>
+
+    <!-- File Upload Form -->
+    <form
+      action="/data"
+      method="post"
+      enctype="multipart/form-data"
+      class="flex items-center justify-center gap-4 mb-6"
+    >
+      <input
+        type="file"
+        name="file"
+        class="border border-gray-300 rounded-lg p-2 w-full"
+      />
+      <button
+        type="submit"
+        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-300"
+      >
+        Upload
+      </button>
+    </form>
+
+    <!-- File List Table -->
+    <div class="overflow-x-auto rounded-lg shadow">
+      <table class="w-full text-center bg-white">
+        <thead class="bg-gray-200 text-gray-700">
+          <tr>
+            <th class="py-2 px-4">#</th>
+            <th class="py-2 px-4">File Name</th>
+            <th class="py-2 px-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="FileTbl" class="text-gray-600"></tbody>
+      </table>
+    </div>
+
+    <!-- Refresh Button -->
+    <div class="text-center mt-6">
+      <button
+        onclick="GetAll()"
+        class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg transition duration-300"
+      >
+        🔄 Refresh Files
+      </button>
+    </div>
+  </div>
+
+  <!-- Add your JavaScript here -->
+  <script>
+    // Dummy function for refreshing files (replace with your API)
+    function GetAll() {
+      // Example fetch call (replace with your real API)
+      fetch("/all")
+        .then((res) => res.json())
+        .then((files) => {
+          const tableBody = document.getElementById("FileTbl");
+          tableBody.innerHTML = ""; // Clear previous data
+          files.forEach((file, index) => {
+            tableBody.innerHTML += `
+              <tr class="border-b">
+                <td class="py-2">${index + 1}</td>
+                <td class="py-2">
+                  <a href="/file/${file}" target="_blank" class="text-blue-500 hover:underline">
+                    ${file}
+                  </a>
+                </td>
+                <td class="py-2">
+                  <button
+                    onclick="deleteFile('${file}', ${index})"
+                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition duration-300"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        });
+    }
+
+    function deleteFile(fileName, index) {
+      if (confirm(`Are you sure you want to delete "${fileName}"?`)) {
+        fetch(`/delete/${fileName}`, {
+          method: "DELETE",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            alert(data.message);
+            GetAll(); // Refresh the file list
+          })
+          .catch((err) => {
+            console.error("Error deleting file:", err);
+            alert("Failed to delete the file.");
+          });
+      }
+    }
+
+    // Auto-load files on page load
+    window.onload = GetAll;
+  </script>
+</body>
+</html>
