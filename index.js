@@ -15,7 +15,11 @@ app.use(express_fileUpload({
 
 
 app.get("/",(req,res)=>{
-    res.sendFile(__dirname+"/index.html")
+    try {
+        res.sendFile(__dirname+"/index.html")
+    } catch (error) {
+        res.send("Server Error",error)
+    }
 })
 
 
